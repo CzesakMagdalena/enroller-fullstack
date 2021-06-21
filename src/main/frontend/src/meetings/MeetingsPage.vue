@@ -2,18 +2,16 @@
   <div>
     <new-meeting-form @added="addNewMeeting($event)"></new-meeting-form>
 
-    <span v-if="meetings.length == 0">
-               Brak zaplanowanych spotkań.
-           </span>
-    <h3 v-else>
-      Zaplanowane zajęcia ({{ meetings.length }})
-    </h3>
+    <span v-if="meetings.length == 0">Brak zaplanowanych spotkań.</span>
+    <h3 v-else>Zaplanowane zajęcia ({{ meetings.length }})</h3>
 
-    <meetings-list :meetings="meetings"
-                   :username="username"
-                   @attend="addMeetingParticipant($event)"
-                   @unattend="removeMeetingParticipant($event)"
-                   @delete="deleteMeeting($event)"></meetings-list>
+    <meetings-list
+      :meetings="meetings"
+      :username="username"
+      @attend="addMeetingParticipant($event)"
+      @unattend="removeMeetingParticipant($event)"
+      @delete="deleteMeeting($event)"
+    ></meetings-list>
   </div>
 </template>
 
@@ -26,12 +24,12 @@
         props: ['username'],
         data() {
             return {
-                meetings: []
+                meetings: this.$http.get("meetings").then(response => {this.meetings=response.body})
             };
         },
         methods: {
             addNewMeeting(meeting) {
-                this.meetings.push(meeting);
+                this.$http.post("meetings", meeting).then(()=>{this.$http.get("meetings").then(response => {this.meetings=response.body})});
             },
             addMeetingParticipant(meeting) {
                 meeting.participants.push(this.username);
